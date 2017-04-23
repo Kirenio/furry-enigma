@@ -4,30 +4,49 @@ using System.Collections;
 public class Sphere : MonoBehaviour
 {
     [Header("Base Sphere Properties")]
-    public GameManager GameManager;
     public GameObject IndicatorsCanvas;
-    public bool isRevealed = false;
+    protected bool isRevealed = false;
 
     protected delegate void InternalEventHandler();
     protected event InternalEventHandler MouseEntryEvent;
     protected event InternalEventHandler MouseExitEvent;
+    protected event InternalEventHandler IsRevealed;
 
     // Use this for initialization
     protected virtual void Start ()
     {
-        GameManager = Rules.GameManager;
-        if(isRevealed)
-        {
-            SubscribeKeyboardHUDEvents();
-            SubscribeMouseHUDEvents();
+        if (isRevealed) SetupSubscriptions();
+        else IsRevealed += SetupSubscriptions;
+    }
 
-            Rules.GameControls.GamePaused += UnsubscribeMouseHUDEvents;
-            Rules.GameControls.GameUnpaused += UnsubscribeMouseHUDEvents;
-            Rules.GameControls.ShowHUD += UnsubscribeMouseHUDEvents;
-            Rules.GameControls.HideHUD += SubscribeMouseHUDEvents;
+    protected void Reveal()
+    {
+        if(isRevealed == false)
+        {
+            isRevealed = true;
+            Debug.Log("Reveal thyself!");
+            if (IsRevealed != null) IsRevealed();
         }
     }
-    
+
+    public void checkDistance(Vector3 pos, float radius)
+    {
+        //Debug.Log(Vector3.Distance(transform.position, pos) + " : " + radius);
+        if (Vector3.Distance(transform.position, pos) <= radius) Reveal();
+    }
+
+    protected void SetupSubscriptions()
+    {
+        SubscribeKeyboardHUDEvents();
+        SubscribeMouseHUDEvents();
+
+        Rules.GameControls.GamePaused += UnsubscribeMouseHUDEvents;
+        Rules.GameControls.GameUnpaused += UnsubscribeMouseHUDEvents;
+        Rules.GameControls.ShowHUD += UnsubscribeMouseHUDEvents;
+        Rules.GameControls.HideHUD += SubscribeMouseHUDEvents;
+        IsRevealed -= SetupSubscriptions;
+    }
+
     protected void ShowHUD()
     {
         if (isRevealed) IndicatorsCanvas.SetActive(true);
@@ -68,7 +87,6 @@ public class Sphere : MonoBehaviour
 
     protected void UnsubscribeMouseHUDEvents()
     {
-        Debug.Log("Unsubscribing mouse events");
         MouseEntryEvent -= ShowHUD;
         MouseExitEvent -= HideHUD;
     }
