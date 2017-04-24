@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class GameManager : MonoBehaviour {
     [Header("Prefabs")]
@@ -19,16 +18,20 @@ public class GameManager : MonoBehaviour {
     public int debrisPerShatteredSphere;
     public int inactiveSpheresQuota;
     public int crackedSpheresQuota;
+    
 
     public LightMote StartingSphere;
     GameObject[] DirectNeighboursGO;
-    LightMote[] DirectNeighbours;
 
-    GameObject RandomDebris
+    public GameObject RandomCrackedMote
+    {
+        get { return CrackedSpheres[Random.Range(0, CrackedSpheres.Length)]; }
+    }
+    public GameObject RandomDebris
     {
         get { return Debris[Random.Range(0, Debris.Length)]; }
     }
-    GameObject RandomDebrisCore
+    public GameObject RandomDebrisCore
     {
         get { return DebrisCores[Random.Range(0, DebrisCores.Length)]; }
     }
@@ -41,22 +44,7 @@ public class GameManager : MonoBehaviour {
     void Awake () {
         //Debug.Log(SphereMaterial.ToString());
         Rules.GameManagerObject = this;
-        GameObject startingSphereGO = (GameObject)Instantiate(LightMote, Vector3.zero, Quaternion.identity);
-        StartingSphere = startingSphereGO.GetComponent<LightMote>();
-
-        StartingSphere.Neighbours = new LightMote[3];
-        DirectNeighboursGO = new GameObject[3];
-        DirectNeighboursGO[0] = (GameObject)Instantiate(LightMote, GetPosition(StartingSphere.transform.position, 10f, 20f, Mathf.PI / 3, Mathf.PI / 6), Quaternion.identity);
-        StartingSphere.Neighbours[0] = DirectNeighboursGO[0].GetComponent<LightMote>();
-        DirectNeighboursGO[1] = (GameObject)Instantiate(LightMote, GetPosition(StartingSphere.transform.position, 8f, 20f, Mathf.PI, Mathf.PI / 2), Quaternion.identity);
-        StartingSphere.Neighbours[1] = DirectNeighboursGO[1].GetComponent<LightMote>();
-        DirectNeighboursGO[2] = (GameObject)Instantiate(LightMote, GetPosition(StartingSphere.transform.position, 9f, 22f, 5/3*Mathf.PI, 4/3*Mathf.PI), Quaternion.identity);
-        StartingSphere.Neighbours[2] = DirectNeighboursGO[2].GetComponent<LightMote>();
-    }
-
-    void Start()
-    {
-        StartingSphere.PreInfuse();
+        Rules.GameStarted += CreateLevel;
     }
     
     void SpawnRandomDerbis(Vector3 pos, float minRange, float maxRange, int amount)
@@ -86,10 +74,10 @@ public class GameManager : MonoBehaviour {
         SpawnRandomDerbis(pos, 2f, 5f, debrisPerShatteredSphere + Random.Range(-2, 3));
     }
 
-    void SpawnShatteredSphereWithRing(Vector3 pos, float minRange, float maxRange)
+    void SpawnShatteredSphereWithRing(Vector3 spherePosition, float minRange, float maxRange)
     {
-        SpawnShatteredSphere(pos);
-        SpawnDebrisRing(pos, minRange, maxRange, (int)(minRange + maxRange));
+        SpawnShatteredSphere(spherePosition);
+        SpawnDebrisRing(spherePosition, minRange, maxRange, (int)(minRange + maxRange));
     }
 
     Vector3 GetPosition(Vector3 pos, float minRange, float maxRange)
@@ -118,8 +106,73 @@ public class GameManager : MonoBehaviour {
         return position;
     }
 
+    Vector3 GetPositionPush(Vector3 pos, float minRange, float maxRange, float angle, float pushAmount)
+    {
+        float distance = Random.Range(minRange, maxRange);
+
+        Vector3 position;
+        angle += Random.Range(0, pushAmount);
+        position.x = pos.x + distance * Mathf.Cos(angle);
+        position.y = 0;
+        position.z = pos.z + distance * Mathf.Sin(angle);
+
+        return position;
+    }
+
     float GetDistance(float minRange, float maxRange)
     {
         return Random.Range(minRange, maxRange);
+    }
+
+    public void InfuseSphere(LightMote target)
+    {
+        bool result = StartingSphere.ReduceEnergyStore(Rules.InfusionCost);
+        if (result) target.Infuse();
+    } 
+
+    public void DistributeInfusionDrain()
+    {
+
+    }
+
+    void CreateLevel()
+    {
+        // Doing the first circle of objects
+        GameObject startingSphereGO = (GameObject)Instantiate(LightMote, Vector3.zero, Quaternion.identity);
+        startingSphereGO.name = "startingSphere";
+        StartingSphere = startingSphereGO.GetComponent<LightMote>();
+        StartingSphere.Neighbours = new LightMote[3];
+        DirectNeighboursGO = new GameObject[3];
+        DirectNeighboursGO[0] = (GameObject)Instantiate(LightMote, GetPosition(StartingSphere.transform.position, 10f, 20f, Mathf.PI / 2.25f, Mathf.PI * 2 / 3), Quaternion.identity);
+        DirectNeighboursGO[0].name = "directN_0";
+        StartingSphere.Neighbours[0] = DirectNeighboursGO[0].GetComponent<LightMote>();
+        DirectNeighboursGO[1] = (GameObject)Instantiate(LightMote, GetPosition(StartingSphere.transform.position, 8f, 16f, Mathf.PI * 11 / 12, Mathf.PI * 13 / 12), Quaternion.identity);
+        DirectNeighboursGO[1].name = "directN_1";
+        StartingSphere.Neighbours[1] = DirectNeighboursGO[1].GetComponent<LightMote>();
+        DirectNeighboursGO[2] = (GameObject)Instantiate(LightMote, GetPosition(StartingSphere.transform.position, 6f, 14f, Mathf.PI * 5 / 3, Mathf.PI * 2), Quaternion.identity);
+        DirectNeighboursGO[2].name = "directN_2";
+        StartingSphere.Neighbours[2] = DirectNeighboursGO[2].GetComponent<LightMote>();
+
+        // Spawning debri
+        SpawnDebrisRing(Vector3.zero, 2f, 20f, debrisRingDensity * 2);
+        SpawnDebrisRing(DirectNeighboursGO[0].transform.position, 3f, 5f, debrisRingDensity * 6);
+        SpawnRandomDerbis(Vector3.zero, 2f, 15f, debrisQuota);
+        SpawnShatteredSphereWithRing(GetPosition(Vector3.zero, 3f, 6f, Mathf.PI / 5f, Mathf.PI / 2.5f), 2f, 6f);
+
+        // Second round os spheres
+        StartingSphere.Neighbours[0].Neighbours = new LightMote[1];
+        GameObject indirectNeighbour = (GameObject)Instantiate(LightMote, GetPosition(DirectNeighboursGO[0].transform.position, 5f, 10f, Mathf.PI / 2.25f, Mathf.PI * 2 / 3), Quaternion.identity);
+        indirectNeighbour.name = StartingSphere.Neighbours[0].name + "_0";
+        StartingSphere.Neighbours[0].Neighbours[0] = indirectNeighbour.GetComponent<LightMote>();
+
+        Instantiate(RandomCrackedMote, GetPosition(DirectNeighboursGO[0].transform.position, 3f, 15f, Mathf.PI * 3 / 4, Mathf.PI * 7 / 6), Quaternion.identity);
+        if (Random.Range(0, 10) > 5)
+            Instantiate(RandomCrackedMote, GetPosition(DirectNeighboursGO[0].transform.position, 5f, 12f, Mathf.PI * 3 / 4, Mathf.PI * 5 / 4), Quaternion.identity);
+        else
+            SpawnShatteredSphere(GetPosition(DirectNeighboursGO[0].transform.position, 4f, 12f, Mathf.PI * 11 / 6, Mathf.PI * 20 / 19));
+
+
+        //After everything is done
+        StartingSphere.PreInfuse();
     }
 }

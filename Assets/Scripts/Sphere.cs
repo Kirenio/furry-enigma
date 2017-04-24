@@ -11,6 +11,7 @@ public class Sphere : MonoBehaviour
     protected event InternalEventHandler MouseEntryEvent;
     protected event InternalEventHandler MouseExitEvent;
     protected event InternalEventHandler IsRevealed;
+    protected event InternalEventHandler Clicked;
 
     // Use this for initialization
     protected virtual void Start ()
@@ -24,7 +25,6 @@ public class Sphere : MonoBehaviour
         if(isRevealed == false)
         {
             isRevealed = true;
-            Debug.Log("Reveal thyself!");
             if (IsRevealed != null) IsRevealed();
         }
     }
@@ -67,6 +67,11 @@ public class Sphere : MonoBehaviour
         if (MouseExitEvent != null) MouseExitEvent();
     }
 
+    protected void OnMouseDown()
+    {
+        if (Clicked != null) Clicked();
+    }
+
     protected void SubscribeKeyboardHUDEvents()
     {
         Rules.GameControls.ShowHUD += ShowHUD;
@@ -89,5 +94,10 @@ public class Sphere : MonoBehaviour
     {
         MouseEntryEvent -= ShowHUD;
         MouseExitEvent -= HideHUD;
+    }
+
+    protected void ForceDisableHud()
+    {
+        IndicatorsCanvas.SetActive(false);
     }
 }
