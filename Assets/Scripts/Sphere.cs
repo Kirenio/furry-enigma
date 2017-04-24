@@ -26,6 +26,7 @@ public class Sphere : MonoBehaviour
         {
             isRevealed = true;
             if (IsRevealed != null) IsRevealed();
+            if (!Rules.HideHUD) ForceEnableHUD();
         }
     }
 
@@ -59,12 +60,18 @@ public class Sphere : MonoBehaviour
 
     protected void OnMouseEnter()
     {
-        if (MouseEntryEvent != null) MouseEntryEvent();
+        if (Rules.HideHUD)
+        {
+            if (MouseEntryEvent != null) MouseEntryEvent(); // Either rename this or find another way to control the HUD
+        }
     }
 
     protected void OnMouseExit()
     {
-        if (MouseExitEvent != null) MouseExitEvent();
+        if (Rules.HideHUD)
+        {
+            if (MouseExitEvent != null) MouseExitEvent();
+        }
     }
 
     protected void OnMouseDown()
@@ -74,14 +81,14 @@ public class Sphere : MonoBehaviour
 
     protected void SubscribeKeyboardHUDEvents()
     {
-        Rules.GameControls.ShowHUD += ShowHUD;
-        Rules.GameControls.HideHUD += HideHUD;
+            Rules.GameControls.ShowHUD += ShowHUD;
+            Rules.GameControls.HideHUD += HideHUD;
     }
 
     protected void UnsubscribeKeyboardHUDEvents()
     {
-        Rules.GameControls.ShowHUD -= ShowHUD;
-        Rules.GameControls.HideHUD -= HideHUD;
+            Rules.GameControls.ShowHUD -= ShowHUD;
+            Rules.GameControls.HideHUD -= HideHUD;
     }
 
     protected void SubscribeMouseHUDEvents()
@@ -99,5 +106,10 @@ public class Sphere : MonoBehaviour
     protected void ForceDisableHud()
     {
         IndicatorsCanvas.SetActive(false);
+    }
+
+    protected void ForceEnableHUD()
+    {
+        IndicatorsCanvas.SetActive(true);
     }
 }

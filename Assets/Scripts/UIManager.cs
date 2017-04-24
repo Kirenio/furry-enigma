@@ -14,6 +14,7 @@ public class UIManager : MonoBehaviour {
         Rules.GameControls.ShowHUD += ShowHighScore;
         Rules.GameControls.HideHUD += HideHighScore;
         Rules.ScoreUpdated += UpdateScore;
+        if (!Rules.HideHUD) Rules.GameStarted += ShowHighScore;
     }
 
     // Update is called once per frame

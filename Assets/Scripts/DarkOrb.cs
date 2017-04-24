@@ -4,6 +4,7 @@ using System.Collections;
 public class DarkOrb : MonoBehaviour {
     float timer = 7;
     float amount = 5;
+    LightMote target;
 
     protected void OnMouseDown()
     {
@@ -11,12 +12,17 @@ public class DarkOrb : MonoBehaviour {
         Destroy(gameObject);
     }
 
+    public void SetTarget(LightMote mote)
+    {
+        target = mote;
+    }
+
     // Update is called once per frame
     void FixedUpdate () {
         if (timer > 0) timer -= Time.fixedDeltaTime;
         else
         {
-            Rules.GameManagerObject.StartingSphere.ReduceEnergyStore(amount);
+            target.ReduceEnergyStore(amount);
             Destroy(gameObject);
         }
 	}

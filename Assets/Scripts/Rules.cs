@@ -9,6 +9,10 @@ public static class Rules{
     public static float InfusionCost = 100;
     static float score;
     public static float Score { get { return score; } }
+    public static List<LightMote> InfusedMotes = new List<LightMote>();
+    public static LightMote RandomInfusedMote { get { return InfusedMotes[Random.Range(0, InfusedMotes.Count)]; } }
+    //public static int RandomInfusedIndex { get { return Random.Range(0, InfusedMotes.Count); } }
+    public static bool HideHUD = false;
 
     public static RulesEventHandler ScoreUpdated;
     public static RulesStateEventHandler GameStarted;
@@ -20,11 +24,13 @@ public static class Rules{
     public static void RegisterProduction(LightMote mote)
     {
         mote.Produced += IncreaseScore;
+        InfusedMotes.Add(mote);
     }
 
     public static void UnregisterProduction(LightMote mote)
     {
         mote.Produced -= IncreaseScore;
+        InfusedMotes.Remove(mote);
     }
 
     static void IncreaseScore(float amount)

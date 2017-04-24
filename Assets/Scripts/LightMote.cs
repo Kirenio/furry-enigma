@@ -114,7 +114,7 @@ public class LightMote : Sphere
             if (currentLightPower > passiveLightRaius) currentLightPower = passiveLightRaius;
         }
 
-        currentLightPower -= darknessRessistence + lightFadePower;
+        currentLightPower -= (darknessRessistence + lightFadePower);
         if (currentLightPower <= 0)
         {
             currentLightPower = 0;
@@ -175,6 +175,7 @@ public class LightMote : Sphere
     public void Infuse()
     {
         Rules.RegisterProduction(this);
+        Clicked -= AskForInfusion;
         isInfused = true;
         isActive = false;
         currentBurnRate = startingResourceBurn;

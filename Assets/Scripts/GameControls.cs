@@ -49,12 +49,18 @@ public class GameControls : MonoBehaviour {
 
         if(Input.GetKeyDown(KeyCode.LeftAlt))
         {
-            if (ShowHUD != null) ShowHUD();
+            if (Rules.HideHUD)
+            {
+                if (ShowHUD != null) ShowHUD();
+            }
         }
 
         if (Input.GetKeyUp(KeyCode.LeftAlt))
         {
-            if (HideHUD != null) HideHUD();
+            if (Rules.HideHUD)
+            {
+                if (HideHUD != null) HideHUD();
+            }
         }
         
         float zoomBy = Input.GetAxis("Mouse ScrollWheel");

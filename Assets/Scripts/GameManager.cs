@@ -21,7 +21,7 @@ public class GameManager : MonoBehaviour {
     public int inactiveSpheresQuota;
     public int crackedSpheresQuota;
 
-    public float basicSpawnCooldown = 150f;
+    public float basicSpawnCooldown = 120f;
     public float LightOrbChance = 4;
     public float cooldown = 0;
     public int iteration;
@@ -61,8 +61,13 @@ public class GameManager : MonoBehaviour {
         {
             if (cooldown > basicSpawnCooldown)
             {
-                if (Random.Range(0f, 10f) > LightOrbChance) Instantiate(LightOrb, GetPosition(Vector3.zero, 1.5f, 25f), Quaternion.identity);
-                else Instantiate(DarkOrb, GetPosition(Vector3.zero, 1.5f, 15f), Quaternion.identity);
+                LightMote target = Rules.RandomInfusedMote;
+                if (Random.Range(0f, 10f) > LightOrbChance) Instantiate(LightOrb, GetPosition(target.transform.position, 2f, 7f), Quaternion.identity);
+                else
+                {
+                    GameObject newDarkOrb = (GameObject)Instantiate(DarkOrb, GetPosition(target.transform.position, 2f, 7f), Quaternion.identity);
+                    newDarkOrb.GetComponent<DarkOrb>().SetTarget(target);
+                }
                 iteration++;
                 cooldown = 0;
             }
