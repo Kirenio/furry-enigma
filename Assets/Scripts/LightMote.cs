@@ -9,8 +9,6 @@ public class LightMote : Sphere
     [Header("Pointers")]
     public Light lightComponent;
     public MeshRenderer meshRendererComponent;
-    public Text timer;
-    public Text rate;
     public Image SliderFill;
     public ParticleSystem Halo;
     public ParticleSystem HaloCollapsing;
@@ -50,8 +48,6 @@ public class LightMote : Sphere
         base.Start();
 
         currenLightResource = maxLightResource;
-        timer.text = ((int)currenLightResource).ToString();
-        rate.text = currentBurnRate.ToString();
         if (!isRevealed) IsRevealed += Activate;
 
         for(int i = 0; i < Neighbours.Length; i++)
@@ -103,9 +99,7 @@ public class LightMote : Sphere
             currentLightPower += lightExtracted + upstreamRecieved;
 
             SliderFill.fillAmount = currenLightResource / maxLightResource;
-
-            timer.text = ((int)currenLightResource).ToString();
-            rate.text = string.Format("{0:0.##}", (lightExtracted - upstreamRecieved));
+            
             upstreamRecieved = 0;
         }
         else if(isActive)
@@ -174,7 +168,7 @@ public class LightMote : Sphere
 
     public void Infuse()
     {
-        Rules.RegisterProduction(this);
+        Rules.GameManagerObject.RegisterProduction(this);
         Clicked -= AskForInfusion;
         isInfused = true;
         isActive = false;
@@ -190,7 +184,7 @@ public class LightMote : Sphere
     public void PreInfuse()
     {
         Reveal();
-        Rules.RegisterProduction(this);
+        Rules.GameManagerObject.RegisterProduction(this);
         isInfused = true;
         meshRendererComponent = gameObject.GetComponent<MeshRenderer>();
         meshRendererComponent.material = Rules.GameManagerObject.SpheresMaterial;
@@ -216,7 +210,7 @@ public class LightMote : Sphere
 
     void StopUnstable()
     {
-        Rules.UnregisterProduction(this);
+        Rules.GameManagerObject.UnregisterProduction(this);
         isInfused = false;
         gameObject.GetComponent<SphereCollider>().enabled = false;
         StopInstability -= StopUnstable;

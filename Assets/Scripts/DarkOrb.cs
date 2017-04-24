@@ -8,7 +8,7 @@ public class DarkOrb : MonoBehaviour {
 
     protected void OnMouseDown()
     {
-        Rules.AddScore(amount);
+        Rules.GameManagerObject.AddScore(amount);
         Destroy(gameObject);
     }
 

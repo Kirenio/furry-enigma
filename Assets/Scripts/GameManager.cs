@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
+public delegate void RulesEventHandler(float amount);
+public delegate void RulesStateEventHandler();
 public class GameManager : MonoBehaviour {
     [Header("Prefabs")]
     public GameObject LightMote;
@@ -13,23 +16,25 @@ public class GameManager : MonoBehaviour {
     //public Material SphereMaterial { get { return sphereMaterial; } }
 
     [Header("GenerationQuotas")]
-    public int debrisRingQuota;
     public int debrisRingDensity;
     public int debrisQuota;
-    public int shatteredSpheresQuota;
     public int debrisPerShatteredSphere;
-    public int inactiveSpheresQuota;
-    public int crackedSpheresQuota;
 
-    public float basicSpawnCooldown = 120f;
+    public float basicSpawnCooldown = 110f;
     public float LightOrbChance = 4;
     public float cooldown = 0;
     public int iteration;
 
     bool GameStarted = false;
+    static float score;
+    public float Score { get { return score; } }
+    public RulesEventHandler ScoreUpdated;
+    public RulesStateEventHandler OnGameStarted;
 
     public LightMote StartingSphere;
     GameObject[] DirectNeighboursGO;
+    public List<LightMote> InfusedMotes = new List<LightMote>();
+    public LightMote RandomInfusedMote { get { return InfusedMotes[Random.Range(0, InfusedMotes.Count)]; } }
 
     public GameObject RandomCrackedMote
     {
@@ -50,9 +55,9 @@ public class GameManager : MonoBehaviour {
 
     // Use this for initialization
     void Awake () {
-        //Debug.Log(SphereMaterial.ToString());
+        score = 0;
         Rules.GameManagerObject = this;
-        Rules.GameStarted += CreateLevel;
+        OnGameStarted += CreateLevel;
     }
     
     void FixedUpdate()
@@ -61,7 +66,7 @@ public class GameManager : MonoBehaviour {
         {
             if (cooldown > basicSpawnCooldown)
             {
-                LightMote target = Rules.RandomInfusedMote;
+                LightMote target = RandomInfusedMote;
                 if (Random.Range(0f, 10f) > LightOrbChance) Instantiate(LightOrb, GetPosition(target.transform.position, 2f, 7f), Quaternion.identity);
                 else
                 {
@@ -76,7 +81,7 @@ public class GameManager : MonoBehaviour {
                 cooldown++;
             }
 
-            if (iteration > 5)
+            if (iteration > 4)
             {
                 LightOrbChance += 0.1f;
                 basicSpawnCooldown--;
@@ -208,5 +213,34 @@ public class GameManager : MonoBehaviour {
         //After everything is done
         StartingSphere.PreInfuse();
         GameStarted = true;
+    }
+
+    public void SetDebrisDensity(int value)
+    {
+        debrisRingDensity = value;
+    }
+
+    void IncreaseScore(float amount)
+    {
+        amount *= 10;
+        score += amount * amount;
+        ScoreUpdated(score);
+    }
+
+    public void RegisterProduction(LightMote mote)
+    {
+        mote.Produced += IncreaseScore;
+        InfusedMotes.Add(mote);
+    }
+
+    public void UnregisterProduction(LightMote mote)
+    {
+        mote.Produced -= IncreaseScore;
+        InfusedMotes.Remove(mote);
+    }
+
+    public void AddScore(float amount)
+    {
+        IncreaseScore(amount);
     }
 }
