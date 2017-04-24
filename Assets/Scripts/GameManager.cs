@@ -3,6 +3,8 @@
 public class GameManager : MonoBehaviour {
     [Header("Prefabs")]
     public GameObject LightMote;
+    public GameObject LightOrb;
+    public GameObject DarkOrb;
     public GameObject[] Debris;
     public GameObject[] DebrisCores;
     public GameObject InactiveSphere;
@@ -18,7 +20,13 @@ public class GameManager : MonoBehaviour {
     public int debrisPerShatteredSphere;
     public int inactiveSpheresQuota;
     public int crackedSpheresQuota;
-    
+
+    public float basicSpawnCooldown = 150f;
+    public float LightOrbChance = 4;
+    public float cooldown = 0;
+    public int iteration;
+
+    bool GameStarted = false;
 
     public LightMote StartingSphere;
     GameObject[] DirectNeighboursGO;
@@ -47,6 +55,31 @@ public class GameManager : MonoBehaviour {
         Rules.GameStarted += CreateLevel;
     }
     
+    void FixedUpdate()
+    {
+        if(GameStarted)
+        {
+            if (cooldown > basicSpawnCooldown)
+            {
+                if (Random.Range(0f, 10f) > LightOrbChance) Instantiate(LightOrb, GetPosition(Vector3.zero, 1.5f, 25f), Quaternion.identity);
+                else Instantiate(DarkOrb, GetPosition(Vector3.zero, 1.5f, 15f), Quaternion.identity);
+                iteration++;
+                cooldown = 0;
+            }
+            else
+            {
+                cooldown++;
+            }
+
+            if (iteration > 5)
+            {
+                LightOrbChance += 0.1f;
+                basicSpawnCooldown--;
+                iteration = 0;
+            }
+        }
+    }
+
     void SpawnRandomDerbis(Vector3 pos, float minRange, float maxRange, int amount)
     {
         for (int i = 0; i < debrisQuota; i++)
@@ -128,11 +161,6 @@ public class GameManager : MonoBehaviour {
     {
         bool result = StartingSphere.ReduceEnergyStore(Rules.InfusionCost);
         if (result) target.Infuse();
-    } 
-
-    public void DistributeInfusionDrain()
-    {
-
     }
 
     void CreateLevel()
@@ -174,5 +202,6 @@ public class GameManager : MonoBehaviour {
 
         //After everything is done
         StartingSphere.PreInfuse();
+        GameStarted = true;
     }
 }

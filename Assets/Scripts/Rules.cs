@@ -12,6 +12,11 @@ public static class Rules{
 
     public static RulesEventHandler ScoreUpdated;
     public static RulesStateEventHandler GameStarted;
+
+    public static void AddScore(float amount)
+    {
+        IncreaseScore(amount);
+    }
     public static void RegisterProduction(LightMote mote)
     {
         mote.Produced += IncreaseScore;
