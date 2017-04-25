@@ -9,9 +9,12 @@ public class LightOrb : MonoBehaviour
 
     protected void OnMouseDown()
     {
-        Rules.GameManagerObject.AddScore(amount * 0.05f);
-        if(target != null) target.IncreaseEnergy(amount);
-        Destroy(gameObject);
+        if (Rules.GameManagerObject.GameStarted)
+        {
+            Rules.GameManagerObject.AddScore(amount * 0.05f);
+            if (target != null) target.IncreaseEnergy(amount);
+            Destroy(gameObject);
+        }
     }
 
     public void SetTarget(LightMote mote)
@@ -21,10 +24,10 @@ public class LightOrb : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (timer > 0) timer -= Time.fixedDeltaTime;
-        else
+        if (Rules.GameManagerObject.GameStarted)
         {
-            Destroy(gameObject);
+            if (timer > 0) timer -= Time.fixedDeltaTime;
+            else Destroy(gameObject);
         }
     }
 }

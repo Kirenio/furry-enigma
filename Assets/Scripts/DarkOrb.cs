@@ -8,8 +8,11 @@ public class DarkOrb : MonoBehaviour {
 
     protected void OnMouseDown()
     {
-        Rules.GameManagerObject.AddScore(amount * 0.05f);
-        Destroy(gameObject);
+        if (Rules.GameManagerObject.GameStarted)
+        {
+            Rules.GameManagerObject.AddScore(amount * 0.05f);
+            Destroy(gameObject);
+        }
     }
     
     public void SetTarget(LightMote mote)
@@ -19,11 +22,14 @@ public class DarkOrb : MonoBehaviour {
 
     // Update is called once per frame
     void FixedUpdate () {
-        if (timer > 0) timer -= Time.fixedDeltaTime;
-        else
+        if (Rules.GameManagerObject.GameStarted)
         {
-            if (target != null) target.ReduceEnergy(amount);
-            Destroy(gameObject);
+            if (timer > 0) timer -= Time.fixedDeltaTime;
+            else
+            {
+                if (target != null) target.ReduceEnergy(amount);
+                Destroy(gameObject);
+            }
         }
-	}
+    }
 }

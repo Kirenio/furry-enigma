@@ -241,7 +241,7 @@ public class GameManager : MonoBehaviour {
     {
         amount *= 10;
         score += amount * amount;
-        ScoreUpdated(score);
+        if (ScoreUpdated != null) ScoreUpdated(score);
     }
 
     public void RegisterProduction(LightMote mote)

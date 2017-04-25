@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class UIManager : MonoBehaviour {
     public GameObject HighscoreObject;
@@ -80,11 +81,13 @@ public class UIManager : MonoBehaviour {
         else Rules.GameControls.ForceShowAllHUD();
     }
 
-    public void ShowGameOver()
+    public IEnumerator ShowGameOver()
     {
         GameOverScreen.SetActive(true);
         Rules.GameManagerObject.GameStarted = false;
+        Rules.GameManagerObject.ScoreUpdated -= UpdateScore;
         Score.text = "SCORE " + (int)Rules.GameManagerObject.Score;
-        Time.timeScale = 0.2f;
+        yield return new WaitForSeconds(2f);
+        Time.timeScale = 0f;
     }
 }

@@ -264,7 +264,7 @@ public class LightMote : Sphere
         UnsubscribeKeyboardHUDEvents();
         UnsubscribeMouseHUDEvents();
         ForceDisableHud();
-        if (isPrimary) triggerGameOver();
+        if (isPrimary) StartCoroutine(Rules.UIManagerObject.ShowGameOver());
     }
 
     void SetUpNeighbours()
@@ -282,11 +282,6 @@ public class LightMote : Sphere
             LineProgress[i].SetPosition(0, transform.position);
             LineProgress[i].SetPosition(1, transform.position);
         }
-    }
-
-    void triggerGameOver()
-    {
-        Rules.UIManagerObject.ShowGameOver();
     }
 
     void SpawnOrb()
