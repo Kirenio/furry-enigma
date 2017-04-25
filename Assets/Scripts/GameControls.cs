@@ -66,4 +66,21 @@ public class GameControls : MonoBehaviour {
         float zoomBy = Input.GetAxis("Mouse ScrollWheel");
         anchoredCamera.transform.position = Vector3.MoveTowards(anchoredCamera.transform.position, transform.position, zoomBy * zoomSpeed);
     }
+
+    public void UnpauseGame()
+    {
+        Time.timeScale = 1f;
+        if (GameUnpaused != null) GameUnpaused();
+        gameMenu.SetActive(false);
+    }
+
+    public void ForceHideAllHUD()
+    {
+        if (HideHUD != null) HideHUD();
+    }
+
+    public void ForceShowAllHUD()
+    {
+        if (ShowHUD != null) ShowHUD();
+    }
 }

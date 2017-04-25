@@ -3,15 +3,15 @@ using System.Collections;
 
 public class DarkOrb : MonoBehaviour {
     float timer = 7;
-    float amount = 5;
+    float amount = Random.Range(10, 40);
     LightMote target;
 
     protected void OnMouseDown()
     {
-        Rules.GameManagerObject.AddScore(amount);
+        Rules.GameManagerObject.AddScore(amount * 0.05f);
         Destroy(gameObject);
     }
-
+    
     public void SetTarget(LightMote mote)
     {
         target = mote;
@@ -22,7 +22,7 @@ public class DarkOrb : MonoBehaviour {
         if (timer > 0) timer -= Time.fixedDeltaTime;
         else
         {
-            target.ReduceEnergyStore(amount);
+            if (target != null) target.ReduceEnergy(amount);
             Destroy(gameObject);
         }
 	}

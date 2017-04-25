@@ -12,7 +12,10 @@ public class GameManager : MonoBehaviour {
     public GameObject[] DebrisCores;
     public GameObject InactiveSphere;
     public GameObject[] CrackedSpheres;
+    public GameObject LineProgress;
+    //public GameObject LineBackground;
     public Material SpheresMaterial;
+    public Material DarkOrbMaterial;
     //public Material SphereMaterial { get { return sphereMaterial; } }
 
     [Header("GenerationQuotas")]
@@ -20,7 +23,7 @@ public class GameManager : MonoBehaviour {
     public int debrisQuota;
     public int debrisPerShatteredSphere;
 
-    public float basicSpawnCooldown = 110f;
+    public float basicSpawnCooldown = 50f;
     public float LightOrbChance = 4;
     public float cooldown = 0;
     public int iteration;
@@ -34,7 +37,18 @@ public class GameManager : MonoBehaviour {
     public LightMote StartingSphere;
     GameObject[] DirectNeighboursGO;
     public List<LightMote> InfusedMotes = new List<LightMote>();
-    public LightMote RandomInfusedMote { get { return InfusedMotes[Random.Range(0, InfusedMotes.Count)]; } }
+    public LightMote RandomInfusedMote {
+        get
+        {
+            int value = Random.Range(0, InfusedMotes.Count);
+            if (InfusedMotes[value] != null) return InfusedMotes[value];
+            else
+            {
+                InfusedMotes.RemoveAt(value);
+                return InfusedMotes[0];
+            }
+        }
+    }
 
     public GameObject RandomCrackedMote
     {
@@ -60,35 +74,40 @@ public class GameManager : MonoBehaviour {
         OnGameStarted += CreateLevel;
     }
     
-    void FixedUpdate()
-    {
-        if(GameStarted)
-        {
-            if (cooldown > basicSpawnCooldown)
-            {
-                LightMote target = RandomInfusedMote;
-                if (Random.Range(0f, 10f) > LightOrbChance) Instantiate(LightOrb, GetPosition(target.transform.position, 2f, 7f), Quaternion.identity);
-                else
-                {
-                    GameObject newDarkOrb = (GameObject)Instantiate(DarkOrb, GetPosition(target.transform.position, 2f, 7f), Quaternion.identity);
-                    newDarkOrb.GetComponent<DarkOrb>().SetTarget(target);
-                }
-                iteration++;
-                cooldown = 0;
-            }
-            else
-            {
-                cooldown++;
-            }
+    //void FixedUpdate()
+    //{
+    //    if(GameStarted)
+    //    {
+    //        if (cooldown > basicSpawnCooldown)
+    //        {
+    //            LightMote target = RandomInfusedMote;
+    //            if (Random.Range(0f, 10f) > LightOrbChance)
+    //            {
+    //                GameObject newLightOrb = (GameObject)Instantiate(LightOrb, GetPosition(target.transform.position, 2f, 7f), Quaternion.identity);
+    //                newLightOrb.GetComponent<LightOrb>().SetTarget(target);
+    //            }
+    //            else
+    //            {
+    //                GameObject newDarkOrb = (GameObject)Instantiate(DarkOrb, GetPosition(target.transform.position, 2f, 7f), Quaternion.identity);
+    //                newDarkOrb.GetComponent<DarkOrb>().SetTarget(target);
+    //            }
+    //            iteration++;
+    //            cooldown = 0;
+    //        }
+    //        else
+    //        {
+    //            cooldown++;
+    //        }
 
-            if (iteration > 4)
-            {
-                LightOrbChance += 0.1f;
-                basicSpawnCooldown--;
-                iteration = 0;
-            }
-        }
-    }
+    //        if (iteration > 3)
+    //        {
+    //            Debug.Log("Increasing spawn speed!");
+    //            LightOrbChance += 0.2f;
+    //            basicSpawnCooldown--;
+    //            iteration = 0;
+    //        }
+    //    }
+    //}
 
     void SpawnRandomDerbis(Vector3 pos, float minRange, float maxRange, int amount)
     {
@@ -123,7 +142,7 @@ public class GameManager : MonoBehaviour {
         SpawnDebrisRing(spherePosition, minRange, maxRange, (int)(minRange + maxRange));
     }
 
-    Vector3 GetPosition(Vector3 pos, float minRange, float maxRange)
+    public Vector3 GetPosition(Vector3 pos, float minRange, float maxRange)
     {
         float distance = Random.Range(minRange, maxRange);
 
@@ -169,7 +188,7 @@ public class GameManager : MonoBehaviour {
 
     public void InfuseSphere(LightMote target)
     {
-        bool result = StartingSphere.ReduceEnergyStore(Rules.InfusionCost);
+        bool result = StartingSphere.TryInfuse(Rules.InfusionCost);
         if (result) target.Infuse();
     }
 
@@ -179,17 +198,16 @@ public class GameManager : MonoBehaviour {
         GameObject startingSphereGO = (GameObject)Instantiate(LightMote, Vector3.zero, Quaternion.identity);
         startingSphereGO.name = "startingSphere";
         StartingSphere = startingSphereGO.GetComponent<LightMote>();
-        StartingSphere.Neighbours = new LightMote[3];
         DirectNeighboursGO = new GameObject[3];
-        DirectNeighboursGO[0] = (GameObject)Instantiate(LightMote, GetPosition(StartingSphere.transform.position, 10f, 20f, Mathf.PI / 2.25f, Mathf.PI * 2 / 3), Quaternion.identity);
+        DirectNeighboursGO[0] = (GameObject)Instantiate(LightMote, GetPosition(StartingSphere.transform.position, 14f, 20f, Mathf.PI / 2.25f, Mathf.PI * 2 / 3), Quaternion.identity);
         DirectNeighboursGO[0].name = "directN_0";
-        StartingSphere.Neighbours[0] = DirectNeighboursGO[0].GetComponent<LightMote>();
-        DirectNeighboursGO[1] = (GameObject)Instantiate(LightMote, GetPosition(StartingSphere.transform.position, 8f, 16f, Mathf.PI * 11 / 12, Mathf.PI * 13 / 12), Quaternion.identity);
+        StartingSphere.Neighbours.Add(DirectNeighboursGO[0].GetComponent<LightMote>());
+        DirectNeighboursGO[1] = (GameObject)Instantiate(LightMote, GetPosition(StartingSphere.transform.position, 10f, 14f, Mathf.PI * 11 / 12, Mathf.PI * 13 / 12), Quaternion.identity);
         DirectNeighboursGO[1].name = "directN_1";
-        StartingSphere.Neighbours[1] = DirectNeighboursGO[1].GetComponent<LightMote>();
-        DirectNeighboursGO[2] = (GameObject)Instantiate(LightMote, GetPosition(StartingSphere.transform.position, 6f, 14f, Mathf.PI * 5 / 3, Mathf.PI * 2), Quaternion.identity);
+        StartingSphere.Neighbours.Add(DirectNeighboursGO[1].GetComponent<LightMote>());
+        DirectNeighboursGO[2] = (GameObject)Instantiate(LightMote, GetPosition(StartingSphere.transform.position, 6f, 10f, Mathf.PI * 5 / 3, Mathf.PI * 2), Quaternion.identity);
         DirectNeighboursGO[2].name = "directN_2";
-        StartingSphere.Neighbours[2] = DirectNeighboursGO[2].GetComponent<LightMote>();
+        StartingSphere.Neighbours.Add(DirectNeighboursGO[2].GetComponent<LightMote>());
 
         // Spawning debri
         SpawnDebrisRing(Vector3.zero, 2f, 20f, debrisRingDensity * 2);
@@ -198,10 +216,9 @@ public class GameManager : MonoBehaviour {
         SpawnShatteredSphereWithRing(GetPosition(Vector3.zero, 3f, 6f, Mathf.PI / 5f, Mathf.PI / 2.5f), 2f, 6f);
 
         // Second round os spheres
-        StartingSphere.Neighbours[0].Neighbours = new LightMote[1];
-        GameObject indirectNeighbour = (GameObject)Instantiate(LightMote, GetPosition(DirectNeighboursGO[0].transform.position, 5f, 10f, Mathf.PI / 2.25f, Mathf.PI * 2 / 3), Quaternion.identity);
+        GameObject indirectNeighbour = (GameObject)Instantiate(LightMote, GetPosition(DirectNeighboursGO[0].transform.position, 8f, 14f, Mathf.PI / 2.25f, Mathf.PI * 2 / 3), Quaternion.identity);
         indirectNeighbour.name = StartingSphere.Neighbours[0].name + "_0";
-        StartingSphere.Neighbours[0].Neighbours[0] = indirectNeighbour.GetComponent<LightMote>();
+        StartingSphere.Neighbours[0].Neighbours.Add(indirectNeighbour.GetComponent<LightMote>());
 
         Instantiate(RandomCrackedMote, GetPosition(DirectNeighboursGO[0].transform.position, 3f, 15f, Mathf.PI * 3 / 4, Mathf.PI * 7 / 6), Quaternion.identity);
         if (Random.Range(0, 10) > 5)
@@ -242,5 +259,10 @@ public class GameManager : MonoBehaviour {
     public void AddScore(float amount)
     {
         IncreaseScore(amount);
+    }
+
+    public void UnregisterInfusedMote(LightMote mote)
+    {
+        InfusedMotes.Remove(mote);
     }
 }
