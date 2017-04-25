@@ -45,7 +45,7 @@ public class LightMote : Sphere
     public bool isActive;
     public bool isInfused;
 
-    public float basicSpawnCooldown = 50f;
+    public float basicSpawnCooldown = Random.Range(160f, 200f);
     public float LightOrbChance = 4;
     public float cooldown = 0;
     public int iteration;
@@ -67,7 +67,7 @@ public class LightMote : Sphere
         darknessRessistence = (currentLightPower / 25 * currentLightPower / 25) * Time.fixedDeltaTime;
         if (isInfused)
         {
-            SpawnOrb();
+            if(Rules.GameManagerObject.GameStarted) SpawnOrb();
             lightFadePower = Random.Range(0f, 1.325f) * Time.fixedDeltaTime;
             lightExtracted = startingResourceBurn * Time.fixedDeltaTime;
 
@@ -305,14 +305,13 @@ public class LightMote : Sphere
         }
         else
         {
-            cooldown++;
+            cooldown += Random.Range(0.8f, 1.2f);
         }
 
         if (iteration > 3)
         {
-            Debug.Log("Increasing spawn speed!");
             LightOrbChance += 0.2f;
-            basicSpawnCooldown--;
+            basicSpawnCooldown -= Random.Range(0.5f, 1.2f);
             iteration = 0;
         }
     }

@@ -83,6 +83,8 @@ public class UIManager : MonoBehaviour {
     public void ShowGameOver()
     {
         GameOverScreen.SetActive(true);
+        Rules.GameManagerObject.GameStarted = false;
         Score.text = "SCORE " + (int)Rules.GameManagerObject.Score;
+        Time.timeScale = 0.2f;
     }
 }

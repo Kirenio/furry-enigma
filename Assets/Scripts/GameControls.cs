@@ -53,6 +53,10 @@ public class GameControls : MonoBehaviour {
             {
                 if (ShowHUD != null) ShowHUD();
             }
+            else
+            {
+                if (HideHUD != null) HideHUD();
+            }
         }
 
         if (Input.GetKeyUp(KeyCode.LeftAlt))
@@ -60,6 +64,10 @@ public class GameControls : MonoBehaviour {
             if (Rules.HideHUD)
             {
                 if (HideHUD != null) HideHUD();
+            }
+            else
+            {
+                if (ShowHUD != null) ShowHUD();
             }
         }
         

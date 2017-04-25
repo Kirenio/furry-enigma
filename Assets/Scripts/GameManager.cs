@@ -28,7 +28,7 @@ public class GameManager : MonoBehaviour {
     public float cooldown = 0;
     public int iteration;
 
-    bool GameStarted = false;
+    public bool GameStarted = false;
     static float score;
     public float Score { get { return score; } }
     public RulesEventHandler ScoreUpdated;
@@ -258,7 +258,7 @@ public class GameManager : MonoBehaviour {
 
     public void AddScore(float amount)
     {
-        IncreaseScore(amount);
+        if (GameStarted) IncreaseScore(amount);
     }
 
     public void UnregisterInfusedMote(LightMote mote)
