@@ -36,14 +36,15 @@ public class LightMote : Sphere
 
     public MoteEventHandler Infused;
     public MoteEventHandler Unstable;
+    public MoteEventHandler OnStopUnstable;
     public MoteEventHandler OnCollapse;
     public MoteResourceEventHandler Produced;
     public MoteResourceEventHandler UpstreamProduced;
-    public MoteEventHandler GameOver;
 
     //Internal Values
     public bool isActive;
     public bool isInfused;
+    public bool isPrimary = false;
 
     public float basicSpawnCooldown = Random.Range(160f, 200f);
     public float LightOrbChance = 4;
@@ -83,7 +84,7 @@ public class LightMote : Sphere
                 currentLightResource -= lightExtracted;
                 currentLightResource += upstreamRecieved;
                 if (Produced != null) Produced(lightExtracted + upstreamRecieved);
-                StopUnstable();
+                if (OnStopUnstable != null) OnStopUnstable();
             }
             else
             {
@@ -204,6 +205,7 @@ public class LightMote : Sphere
         Halo.Stop();
         Halo.Play();
         Unstable += BecomeUnstable;
+        OnCollapse += Collapse;
         InfuseButton.SetActive(false);
     }
 
@@ -212,6 +214,7 @@ public class LightMote : Sphere
         Reveal();
         Rules.GameManagerObject.RegisterProduction(this);
         isInfused = true;
+        isPrimary = true;
         meshRendererComponent = gameObject.GetComponent<MeshRenderer>();
         meshRendererComponent.material = Rules.GameManagerObject.SpheresMaterial;
         meshRendererComponent.material.EnableKeyword("_EMISSION");
@@ -224,13 +227,13 @@ public class LightMote : Sphere
         Halo.Simulate(10f,false, false);
         Halo.Play();
         Unstable += BecomeUnstable;
-        OnCollapse += triggerGameOver;
+        OnCollapse += Collapse;
     }
 
     void BecomeUnstable()
     {
         Unstable -= BecomeUnstable;
-        OnCollapse += Collapse;
+        OnStopUnstable += StopUnstable;
         ParticleSystem.EmissionModule emc = HaloCollapsing.emission;
         emc.enabled = true;
     }
@@ -238,7 +241,7 @@ public class LightMote : Sphere
     void StopUnstable()
     {
         Unstable += BecomeUnstable;
-        OnCollapse -= Collapse;
+        OnStopUnstable -= StopUnstable;
         ParticleSystem.EmissionModule emc = HaloCollapsing.emission;
         emc.enabled = false;
     }
@@ -261,6 +264,7 @@ public class LightMote : Sphere
         UnsubscribeKeyboardHUDEvents();
         UnsubscribeMouseHUDEvents();
         ForceDisableHud();
+        if (isPrimary) triggerGameOver();
     }
 
     void SetUpNeighbours()
@@ -310,8 +314,8 @@ public class LightMote : Sphere
 
         if (iteration > 3)
         {
-            LightOrbChance += 0.2f;
-            basicSpawnCooldown -= Random.Range(0.5f, 1.2f);
+            LightOrbChance += 0.1f;
+            basicSpawnCooldown -= Random.Range(0.2f, 0.5f);
             iteration = 0;
         }
     }
