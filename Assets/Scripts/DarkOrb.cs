@@ -5,7 +5,7 @@ public class DarkOrb : MonoBehaviour {
     float timer = 7;
     float amount = Random.Range(10, 40);
     LightMote target;
-
+    
     protected void OnMouseDown()
     {
         if (Rules.GameManagerObject.GameStarted)

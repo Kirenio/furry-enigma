@@ -125,7 +125,7 @@ public class LightMote : Sphere
 
         for (int i = 0; i < Neighbours.Count; i++)
         {
-            LineProgress[i].SetPosition(1, Vector3.Lerp(transform.position, Neighbours[i].transform.position, currentLightPower / Vector3.Distance(transform.position, Neighbours[i].transform.position)));
+            if(!Neighbours[i].isInfused) LineProgress[i].SetPosition(1, Vector3.Lerp(transform.position, Neighbours[i].transform.position, currentLightPower / Vector3.Distance(transform.position, Neighbours[i].transform.position)));
         }
 
         if (currentLightResource > maxLightResource) currentLightResource = maxLightResource;
